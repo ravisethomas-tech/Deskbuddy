@@ -129,6 +129,15 @@ String notesText = "No notes yet.";
 bool notesDirty = true;
 String buddyNickname = "";
 
+enum TrashType {
+  TRASH_NONE = 0,
+  TRASH_HOUSEHOLD,
+  TRASH_RECYCLABLE,
+  TRASH_GLASS,
+  TRASH_GREEN,
+  TRASH_BULKY
+};
+
 enum HomeWidgetType {
   HOME_WIDGET_WEEK = 0,
   HOME_WIDGET_TIMER,
@@ -137,7 +146,8 @@ enum HomeWidgetType {
   HOME_WIDGET_KP,
   HOME_WIDGET_UV,
   HOME_WIDGET_WIND,
-  HOME_WIDGET_SUN
+  HOME_WIDGET_SUN,
+  HOME_WIDGET_TRASH
 };
 
 const int HOME_SLOT_COUNT = 4;
