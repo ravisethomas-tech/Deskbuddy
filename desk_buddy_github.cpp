@@ -87,6 +87,12 @@ const uint16_t COL_GREEN  = TFT_GREEN;
 const uint16_t COL_YELLOW = 0xFFE0;
 const uint16_t COL_RED    = TFT_RED;
 const uint16_t COL_BLUE   = 0x041F;
+const uint16_t TRASH_WHITE  = TFT_WHITE;
+const uint16_t TRASH_GREY   = 0x8410;
+const uint16_t TRASH_YELLOW = TFT_YELLOW;
+const uint16_t TRASH_GREEN  = TFT_GREEN;
+const uint16_t TRASH_BROWN  = 0xA145;
+const uint16_t TRASH_PURPLE = 0x801F;
 
 String textColorKey = "standard";
 String unitKey = "metric"; // metric = C/mm, imperial = F/in
