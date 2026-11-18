@@ -2098,25 +2098,46 @@ void updateWeatherDynamic() {
   }
 }
 
-void drawNotesPageFull() {
-  tft.fillScreen(COL_BG);
-  drawTopBar("Notes");
-  drawNavBar();
+void drawActionsPage()
+{
+    tft.fillScreen(COL_BG);
 
-  drawCard(8, 42, 224, 226, true);
+    drawTopBar("Actions");
 
-  pageDirty = false;
-  lastDrawnPage = PAGE_NOTES;
-  lastNotesText = "";
-}
+    drawNavBar();
 
-void updateNotesDynamic() {
-  if (notesText != lastNotesText || notesDirty) {
-    tft.fillRect(18, 54, 204, 196, COL_PANEL);
-    drawWrappedTextLimited(18, 54, 198, notesText, 2, COL_TEXT, COL_PANEL, 12);
-    lastNotesText = notesText;
-    notesDirty = false;
-  }
+    drawCard(18,55,204,40,true);
+    drawCard(18,105,204,40,true);
+    drawCard(18,155,204,40,true);
+    drawCard(18,205,204,40,true);
+
+    tft.drawCentreString(
+        "Portail",
+        120,
+        68,
+        2
+    );
+
+    tft.drawCentreString(
+        "Eclairage",
+        120,
+        118,
+        2
+    );
+
+    tft.drawCentreString(
+        "Aspirateur",
+        120,
+        168,
+        2
+    );
+
+    tft.drawCentreString(
+        "Scenario Nuit",
+        120,
+        218,
+        2
+    );
 }
 
 void drawStatusPageFull() {
@@ -2435,7 +2456,7 @@ void handleRoot() {
   page += "<p>Short notes synced to the device.</p>";
   page += "<label class='label'>Notes</label>";
   page += "<textarea name='notes' maxlength='700'>";
-  page += htmlEscape(notesText);
+  page += htmlEscape(wasteCalendar);
   page += "</textarea>";
   page += "<div class='muted'>Saved notes show up right away.</div>";
   page += "</div></div>";
@@ -2806,6 +2827,8 @@ void setup() {
   pinMode(27, OUTPUT);
   digitalWrite(27, HIGH);
 
+  updteWasteStatus();
+    
   loadStoredSettings();
   wasteCalendar = prefs.getString("calendar","");
 
@@ -2861,6 +2884,15 @@ prefs.putString("calendr", wasteCalendar);
 }
 
 void loop() {
+
+    static unsigned long lastWasteCheck=0;
+
+if(millis()-lastWasteCheck>60000)
+{
+    updateWasteStatus();
+    lastWasteCheck=millis();
+}
+    
   server.handleClient();
   updateWiFiConnectionState();
   updateFocusTimerState();
@@ -2929,3 +2961,8 @@ void loop() {
 
   delay(10);
 }
+void executeAction1(){}
+void executeAction2(){}
+void executeAction3(){}
+void executeAction4(){}
+
