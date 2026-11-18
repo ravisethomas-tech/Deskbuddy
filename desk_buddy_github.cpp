@@ -169,7 +169,7 @@ void drawTrashWidget(
 
     sprSmall.fillCircle(
     w/2,
-    h/2 + ,
+    h/2 + 4,
     18,
     color
 );
@@ -396,7 +396,7 @@ const char* homeWidgetLabel(HomeWidgetType type) {
     case HOME_WIDGET_UV:      return "UV index";
     case HOME_WIDGET_WIND:    return "Wind";
     case HOME_WIDGET_SUN:     return "Sun event";
-    case HOME_WIDGET_TRASH:   return "trash";
+    case HOME_WIDGET_TRASH:   return "waste";
     default:                  return "Week";
   }
 }
@@ -2457,9 +2457,9 @@ void handleRoot() {
   page += "<div class='panel' data-panel='notes'>";
   page += "<button type='button' class='panel-toggle' aria-expanded='true'><h2>Waste Calendar</h2><span class='panel-chevron'>&#9662;</span></button>";
   page += "<div class='panel-body'>";
-  page += "<p>Short notes synced to the device.</p>";
+  page += "<p>Waste collection calendar.One entry per line.</p>";
   page += "<label class='label'>Waste Calendar</label>";
-  page += "<textarea name='Waste Calendar' maxlength='700'>";
+  page += "<textarea name='calendar' maxlength='700'>";
   page += htmlEscape(wasteCalendar);
   page += "</textarea>";
   page += "<div class='muted'>Saved notes show up right away.</div>";
