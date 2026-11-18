@@ -27,6 +27,152 @@ const char* WIFI_SSID = "YOUR_WIFI_SSID";       // Replace with your WiFi networ
 const char* WIFI_PASS = "YOUR_WIFI_PASSWORD";   // Replace with your WiFi password
 
 // =========================================================
+//CALENDRIER
+// =========================================================
+
+TashType trashTypeFromText(String type)
+{
+    type.trim();
+
+    if(type=="HOUSEHOLD") return TRASH_HOUSEHOLD;
+    if(type=="RECYCLABLE") return TRASH_RECYCLABLE;
+    if(type=="GLASS") return TRASH_GLASS;
+    if(type=="GREEN") return TRASH_GREEN;
+    if(type=="BULKY") return TRASH_BULKY;
+
+    return TRASH_NONE;
+}
+
+void updateWasteStatus()
+{
+    tomorrowTrash = TRASH_NONE;
+
+   time_t now=time(nullptr);
+
+    now += 24*3600;
+
+    struct tm tmTomorrow;
+
+    localtime_r(&now,&tmTomorrow);
+
+    char dateKey[11];
+
+    sprintf(
+      dateKey,
+      "%04d-%02d-%02d",
+      tmTomorrow.tm_year+1900,
+      tmTomorrow.tm_mon+1,
+      tmTomorrow.tm_mday
+    );
+
+    int start = 0;
+
+    while(start < wasteCalendar.length())
+    {
+        int end =
+          wasteCalendar.indexOf('\n',start);
+
+        if(end<0)
+            end =
+            wasteCalendar.length();
+
+        String line =
+           wasteCalendar.substring(start,end);
+
+        int sep = line.indexOf(';');
+
+        if(sep > 0)
+        {
+            String date =
+               line.substring(0,sep);
+
+            String type =
+               line.substring(sep+1);
+
+            date.trim();
+            type.trim();
+
+            if(date == String(dateKey))
+            {
+                tomorrowTrash =
+                   trashTypeFromText(type);
+
+                return;
+            }
+        }
+
+        start = end + 1;
+    }
+}
+
+void drawTrashWidget(
+    int x,
+    int y,
+    int w,
+    int h,
+    String& cache,
+    bool force=false)
+{
+    String key =
+      String((int)tomorrowTrash);
+
+    if(!force && cache==key)
+        return;
+
+    cache = key;
+
+    uint16_t color = TRASH_WHITE;
+
+    switch(tomorrowTrash)
+    {
+        case TRASH_HOUSEHOLD:
+            color = TRASH_GREY;
+            break;
+
+        case TRASH_RECYCLABLE:
+            color = TRASH_YELLOW;
+            break;
+
+        case TRASH_GLASS:
+            color = TRASH_GREEN;
+            break;
+
+        case TRASH_GREEN:
+            color = TRASH_BROWN;
+            break;
+
+        case TRASH_BULKY:
+            color = TRASH_PURPLE;
+            break;
+
+        default:
+            color = TRASH_WHITE;
+            break;
+    }
+
+    makeSpriteCard(
+      sprSmall,
+      w,
+      h,
+      true
+    );
+
+    sprSmall.fillCircle(
+      w/2,
+      h/2,
+      18,
+      color
+    );
+
+    pushSpriteAndDelete(
+      sprSmall,
+      x,
+      y
+    );
+}
+
+
+// =========================================================
 // DISPLAY / TOUCH
 // =========================================================
 TFT_eSPI tft;
@@ -87,6 +233,12 @@ const uint16_t COL_GREEN  = TFT_GREEN;
 const uint16_t COL_YELLOW = 0xFFE0;
 const uint16_t COL_RED    = TFT_RED;
 const uint16_t COL_BLUE   = 0x041F;
+const uint16_t TRASH_WHITE  = TFT_WHITE;
+const uint16_t TRASH_GREY   = 0x8410;
+const uint16_t TRASH_YELLOW = TFT_YELLOW;
+const uint16_t TRASH_GREEN  = TFT_GREEN;
+const uint16_t TRASH_BROWN  = 0xA145;
+const uint16_t TRASH_PURPLE = 0x801F;
 
 String textColorKey = "standard";
 String unitKey = "metric"; // metric = C/mm, imperial = F/in
@@ -128,6 +280,19 @@ const int PAGE_WIDGET_H = HOME_WIDGET_H;
 String notesText = "No notes yet.";
 bool notesDirty = true;
 String buddyNickname = "";
+String wasteCalendar = "";
+
+TrashType tomorrowTrash = TRASH_NONE;
+
+enum TrashType
+{
+    TRASH_NONE = 0,
+    TRASH_HOUSEHOLD,
+    TRASH_RECYCLABLE,
+    TRASH_GLASS,
+    TRASH_GREEN,
+    TRASH_BULKY
+};
 
 enum HomeWidgetType {
   HOME_WIDGET_WEEK = 0,
@@ -137,7 +302,8 @@ enum HomeWidgetType {
   HOME_WIDGET_KP,
   HOME_WIDGET_UV,
   HOME_WIDGET_WIND,
-  HOME_WIDGET_SUN
+  HOME_WIDGET_SUN,
+  HOME_WIDGET_TRASH
 };
 
 const int HOME_SLOT_COUNT = 4;
@@ -145,7 +311,7 @@ HomeWidgetType homeWidgetSlots[HOME_SLOT_COUNT] = {
   HOME_WIDGET_WEEK,
   HOME_WIDGET_TIMER,
   HOME_WIDGET_RAIN,
-  HOME_WIDGET_OUTDOOR
+  HOME_WIDGET_TRASH
 };
 
 String cacheHomeSlots[HOME_SLOT_COUNT];
@@ -156,7 +322,7 @@ String cacheHomeSlots[HOME_SLOT_COUNT];
 enum Page {
   PAGE_HOME = 0,
   PAGE_WEATHER = 1,
-  PAGE_NOTES = 2,
+  PAGE_ACTIONS = 2,
   PAGE_STATUS = 3
 };
 
@@ -212,7 +378,9 @@ const char* homeWidgetKey(HomeWidgetType type) {
     case HOME_WIDGET_UV:      return "uv";
     case HOME_WIDGET_WIND:    return "wind";
     case HOME_WIDGET_SUN:     return "sun";
+    case HOME_WIDGET_TRASH:   return "trash";
     default:                  return "week";
+    
   }
 }
 
@@ -226,6 +394,7 @@ const char* homeWidgetLabel(HomeWidgetType type) {
     case HOME_WIDGET_UV:      return "UV index";
     case HOME_WIDGET_WIND:    return "Wind";
     case HOME_WIDGET_SUN:     return "Sun event";
+    case HOME_WIDGET_TRASH:   return "trash";
     default:                  return "Week";
   }
 }
@@ -239,6 +408,7 @@ HomeWidgetType homeWidgetFromKey(const String& key) {
   if (key == "uv") return HOME_WIDGET_UV;
   if (key == "wind") return HOME_WIDGET_WIND;
   if (key == "sun") return HOME_WIDGET_SUN;
+  if(key == "trash") return HOME_WIDGET_TRASH;
   return HOME_WIDGET_WEEK;
 }
 
@@ -1328,7 +1498,7 @@ void drawNavBar() {
   tft.drawFastHLine(0, y, SCREEN_W, COL_STROKE);
 
   const int btnW = SCREEN_W / 4;
-  const char* names[4] = {"Home", "Weather", "Notes", "Status"};
+  const char* names[4] = {"Home", "Weather", "Actions", "Status"};
 
   for (int i = 0; i < 4; i++) {
     int bx = i * btnW;
@@ -1669,7 +1839,11 @@ void drawHomeSlotWidget(int slot, bool force = false) {
     case HOME_WIDGET_SUN:
       drawSunEventWidget(x, y, w, h, cacheHomeSlots[slot], force);
       break;
+    case HOME_WIDGET_TRASH:
+    drawTrashWidget(x, y, w, h, cacheHomeSlots[slot], force);
+    break;
   }
+  
 }
 
 void drawFocusMenuOverlay(bool force = false) {
@@ -2633,6 +2807,11 @@ void setup() {
   digitalWrite(27, HIGH);
 
   loadStoredSettings();
+  wasteCalendar = prefs.getString("calendar","");
+
+  saveSettings();
+prefs.putString("calendr", wasteCalendar);
+  
   setBacklight(BL_FULL);
   lastInteractionMs = millis();
 
