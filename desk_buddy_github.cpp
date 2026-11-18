@@ -39,9 +39,10 @@ enum TrashType
     TRASH_GREEN,
     TRASH_BULKY
 };
-String wasteCalendar = "";
 
+String wasteCalendar = "";
 TrashType tomorrowTrash = TRASH_NONE;
+
 TrashType trashTypeFromText(String type)
 {
     type.trim();
@@ -2462,7 +2463,7 @@ void handleRoot() {
   page += "<textarea name='calendar' maxlength='700'>";
   page += htmlEscape(wasteCalendar);
   page += "</textarea>";
-  page += "<div class='muted'>Saved notes show up right away.</div>";
+  page += "<div class='muted'>Collection calendar updates are saved immediately.</div>";
   page += "</div></div>";
 
   page += "<div class='panel' data-panel='theme'>";
