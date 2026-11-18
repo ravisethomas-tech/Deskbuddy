@@ -168,11 +168,11 @@ void drawTrashWidget(
     );
 
     sprSmall.fillCircle(
-      w/2,
-      h/2,
-      18,
-      color
-    );
+    w/2,
+    h/2 + ,
+    18,
+    color
+);
 
     pushSpriteAndDelete(
       sprSmall,
@@ -560,7 +560,8 @@ void appendHomeWidgetOptions(String& page, const String& selectedKey) {
     HOME_WIDGET_KP,
     HOME_WIDGET_UV,
     HOME_WIDGET_WIND,
-    HOME_WIDGET_SUN
+    HOME_WIDGET_SUN,
+    HOME_WIDGET_TRASH
   };
 
   for (HomeWidgetType type : types) {
@@ -2251,7 +2252,7 @@ void updateCurrentPageDynamic() {
   switch (currentPage) {
     case PAGE_HOME:    updateHomeDynamic(); break;
     case PAGE_WEATHER: updateWeatherDynamic(); break;
-    case PAGE_ACTIONS: updateActionDynamic(); break;
+    case PAGE_ACTIONS: break;
     case PAGE_STATUS:  updateStatusDynamic(); break;
   }
 }
@@ -2454,11 +2455,11 @@ void handleRoot() {
   page += "<div class='layout'><div class='stack'>";
 
   page += "<div class='panel' data-panel='notes'>";
-  page += "<button type='button' class='panel-toggle' aria-expanded='true'><h2>Notes</h2><span class='panel-chevron'>&#9662;</span></button>";
+  page += "<button type='button' class='panel-toggle' aria-expanded='true'><h2>Waste Calendar</h2><span class='panel-chevron'>&#9662;</span></button>";
   page += "<div class='panel-body'>";
   page += "<p>Short notes synced to the device.</p>";
-  page += "<label class='label'>Notes</label>";
-  page += "<textarea name='notes' maxlength='700'>";
+  page += "<label class='label'>Waste Calendar</label>";
+  page += "<textarea name='Waste Calendar' maxlength='700'>";
   page += htmlEscape(wasteCalendar);
   page += "</textarea>";
   page += "<div class='muted'>Saved notes show up right away.</div>";
@@ -2685,8 +2686,10 @@ void handleSave() {
     int nextValue = server.hasArg(key) ? server.arg(key).toInt() : currentValue;
     timerPresetMin[i] = sanitizeTimerMinutes(nextValue);
   }
-
-  prefs.putString(calendar", wasteCalendar);
+    
+  wasteCalendar = newCalendar;
+    
+  prefs.putString("calendar", wasteCalendar);
   prefs.putString("accent", newAccent);
   prefs.putString("bg", newBg);
   prefs.putString("text", newText);
@@ -2831,13 +2834,10 @@ void setup() {
   pinMode(27, OUTPUT);
   digitalWrite(27, HIGH);
 
-  updateWasteStatus();
-    
   loadStoredSettings();
-  wasteCalendar = prefs.getString("calendar","");
-
-  
-  
+    
+  updateWasteStatus();
+     
   setBacklight(BL_FULL);
   lastInteractionMs = millis();
 
