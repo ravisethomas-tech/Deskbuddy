@@ -30,7 +30,17 @@ const char* WIFI_PASS = "YOUR_WIFI_PASSWORD";   // Replace with your WiFi passwo
 //CALENDRIER
 // =========================================================
 
-TashType trashTypeFromText(String type)
+enum TrashType
+{
+    TRASH_NONE = 0,
+    TRASH_HOUSEHOLD,
+    TRASH_RECYCLABLE,
+    TRASH_GLASS,
+    TRASH_GREEN,
+    TRASH_BULKY
+};
+
+TrashType trashTypeFromText(String type)
 {
     type.trim();
 
@@ -284,15 +294,7 @@ String wasteCalendar = "";
 
 TrashType tomorrowTrash = TRASH_NONE;
 
-enum TrashType
-{
-    TRASH_NONE = 0,
-    TRASH_HOUSEHOLD,
-    TRASH_RECYCLABLE,
-    TRASH_GLASS,
-    TRASH_GREEN,
-    TRASH_BULKY
-};
+
 
 enum HomeWidgetType {
   HOME_WIDGET_WEEK = 0,
@@ -1167,6 +1169,7 @@ void loadStoredSettings() {
   notesText        = prefs.getString("notes", "No notes yet.");
   buddyNickname    = prefs.getString("nickname", "");
   locationName     = prefs.getString("locname", "Berlin");
+  wasteCalendar    = prefs.getString("calendar", "");
   LAT              = prefs.getFloat("lat", 52.5200f);
   LNG              = prefs.getFloat("lng", 13.4050f);
   sleepIntervalMin = prefs.getInt("sleepMin", 10);
@@ -1175,7 +1178,7 @@ void loadStoredSettings() {
   timezoneKey      = sanitizeTimezoneKey(prefs.getString("tz", "europe_central"));
   flashModeEnabled = prefs.getBool("flashMode", false);
   wifiEnabled      = prefs.getBool("wifiEnabled", true);
-
+      
   for (int i = 0; i < HOME_SLOT_COUNT; i++) {
     String key = String("homeSlot") + String(i);
     homeWidgetSlots[i] = homeWidgetFromKey(prefs.getString(key.c_str(), homeWidgetKey(homeWidgetSlots[i])));
@@ -2226,7 +2229,7 @@ void drawCurrentPageFull() {
   switch (currentPage) {
     case PAGE_HOME:    drawHomePageFull(); break;
     case PAGE_WEATHER: drawWeatherPageFull(); break;
-    case PAGE_NOTES:   drawNotesPageFull(); break;
+    case PAGE_ACTIONS: drawActionsPage(); break;
     case PAGE_STATUS:  drawStatusPageFull(); break;
   }
 
@@ -2248,7 +2251,7 @@ void updateCurrentPageDynamic() {
   switch (currentPage) {
     case PAGE_HOME:    updateHomeDynamic(); break;
     case PAGE_WEATHER: updateWeatherDynamic(); break;
-    case PAGE_NOTES:   updateNotesDynamic(); break;
+    case PAGE_ACTIONS: updateActionDynamic(); break;
     case PAGE_STATUS:  updateStatusDynamic(); break;
   }
 }
@@ -2622,6 +2625,7 @@ void handleRoot() {
 }
 
 void handleSave() {
+  String newCalendar = server.arg("calendar");
   String newNotes  = server.hasArg("notes") ? server.arg("notes") : notesText;
   String newAccent = server.hasArg("accent") ? server.arg("accent") : "cyan";
   String newBg     = server.hasArg("bg") ? server.arg("bg") : "slate";
@@ -2682,7 +2686,7 @@ void handleSave() {
     timerPresetMin[i] = sanitizeTimerMinutes(nextValue);
   }
 
-  prefs.putString("notes", notesText);
+  prefs.putString(calendar", wasteCalendar);
   prefs.putString("accent", newAccent);
   prefs.putString("bg", newBg);
   prefs.putString("text", newText);
@@ -2827,13 +2831,12 @@ void setup() {
   pinMode(27, OUTPUT);
   digitalWrite(27, HIGH);
 
-  updteWasteStatus();
+  updateWasteStatus();
     
   loadStoredSettings();
   wasteCalendar = prefs.getString("calendar","");
 
-  saveSettings();
-prefs.putString("calendr", wasteCalendar);
+  
   
   setBacklight(BL_FULL);
   lastInteractionMs = millis();
