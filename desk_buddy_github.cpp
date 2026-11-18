@@ -39,7 +39,9 @@ enum TrashType
     TRASH_GREEN,
     TRASH_BULKY
 };
+String wasteCalendar = "";
 
+TrashType tomorrowTrash = TRASH_NONE;
 TrashType trashTypeFromText(String type)
 {
     type.trim();
@@ -290,9 +292,7 @@ const int PAGE_WIDGET_H = HOME_WIDGET_H;
 String notesText = "No notes yet.";
 bool notesDirty = true;
 String buddyNickname = "";
-String wasteCalendar = "";
 
-TrashType tomorrowTrash = TRASH_NONE;
 
 
 
